@@ -1,0 +1,5 @@
+TMTProc_masterscript - Final script to run the module
+	Inputs: Report quant output file (xlsx), noiseband, SumSn cutoff
+	Functions: 
+	Outputs: Summary plots and a matlab object with the outputs (same name as the input file)
+	
