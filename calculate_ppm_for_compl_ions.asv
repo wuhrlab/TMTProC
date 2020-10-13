@@ -1,0 +1,6 @@
+function exp = Does_ppp_filter_pass(exp)
+
+max_ppm_err = max(exp.data.ppm_err_TMTc,2);
+exp.passed_ppm_filter = max_ppm_err < 10;
+
+end
