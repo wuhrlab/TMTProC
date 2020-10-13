@@ -18,10 +18,6 @@ binary_abundand_Ynmin1_positions_saved = zeros(max_for,15);
 %initiate What percentage of each position permeates the isolation window
 Percentage_Permeates_at_Position_stored = zeros(max_for,12);
 
-%Initialize structure to store the TMT postion matrix P(TMT) P_126...P_121
-temp = cell(max_for,1);
-Precursor_Matrices = struct('P_126',temp,'P_127',temp,'P_128',temp,'P_130',temp,'P_131',temp);
-
 % initializing Sum Ynmin 1
 sum_ions_Ynmin1 = zeros(length(data.ScanF),1);
 % initializes waitbar
@@ -49,7 +45,7 @@ num_TMT = data.num_TMT;
 %structure as it has to be updated during parfor loop. 
 precursor_used_for_isolation_window = zeros(length(data.num_TMT),1);
 
-for index = 1:max_for      % Can be switched between parfor and for loop for speed/debugging
+parfor index = 1:max_for      % Can be switched between parfor and for loop for speed/debugging
     if index == 0
         1; %Debugging possibility to stop
     end
@@ -64,7 +60,7 @@ for index = 1:max_for      % Can be switched between parfor and for loop for spe
     
     % Check if enough precursor was measured, if so and if precursor flag
     % has been selected modify the permeates position by what was measured
-    if Use_Precursor && sum(measured_precursor_envelope(index,:)) > 50
+    if Use_Precursor && sum(measured_precursor_envelope(index,:)) > 10
        %Update Array if precursor was used to define isolation window
        precursor_used_for_isolation_window(index) = 1;
        Which_precursor_positions_to_consider = logical(Percentage_Permeates_at_Position);
@@ -121,7 +117,7 @@ for index = 1:max_for      % Can be switched between parfor and for loop for spe
     sum_ions_Ynmin1(index) = noiseband*sum([Ynmin1_envelope(index,:),0,0,0].*binary_abundand_Ynmin1_positions);
     %exp.data.sum_ions_Ynmin1=sum(data.Ynmin1_envelope(:,2:8), 2) ./ (data.z - 1).*exp.; % The charges rather than ions version: exp.data.sum_ions_Ynmin1=sum(exp.data.Ynmin1_envelope, 2)./exp.noiseband;  %Number of charges in Ynmin1 envelope % only consider positions 0 to 10 as sometimes the 12th position will be cutof => 0 charges
 
-    if sum_ions_Ynmin1(index) > 50
+    if sum_ions_Ynmin1(index) > 5
         %renormalize Ynmin1 envelope only for positions considered
         Ynmin1_envelope_renormalized=normalize_matrix_by_row(binary_abundand_Ynmin1_positions.*Ynmin1_envelope_norm(index,:));
         %options defines the tolerance for the solutions (default would be e-6)

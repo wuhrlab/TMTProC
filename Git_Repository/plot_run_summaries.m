@@ -67,6 +67,7 @@ ylabel('Number of peptides')
 subplot(3,3,5)
 %Plot a figure that explains cutoffs for goodness of fit
 
+%{
 if exp.calculate_cosine_distance
     group = double(exp.cosine_distance < 0.01); % distinguish based on goodnesfit
     group(~exp.mobile_protons_index) = 3;        %mobile proton peptides get their own group
@@ -76,6 +77,11 @@ else
     group(~exp.mobile_protons_index) = 3;        %mobile proton peptides get their own group
     gscatter(exp.data.sum_ions_Ynmin1,exp.goodnes_fit,group);
 end
+%}
+
+group = zeros(size(exp.data.ScanF,1),1);
+group(~exp.mobile_protons_index) = 1;        %mobile proton peptides get their own group
+gscatter(exp.data.sum_ions_Ynmin1,exp.goodnes_fit,group);
 
 %if exp.calculate_cosine_distance
 %    goodnesfit_marker = exp.cosine_distance < 0.05;
@@ -87,8 +93,7 @@ end
 
 
 set(gca,'XScale','log','Yscale','log','XLim',[50,max(exp.data.sum_ions_Ynmin1)],'YDir','reverse', 'YLim',[min(exp.goodnes_fit(:)),1])
-legend('Mobile Proton','poor quality: cosine distance > 0.05','high quality: cosine distance < 0.05')
-refline(0,exp.goodnesfit_cutoff)
+legend('Mobile Proton','No Mobile Proton')
 %plot function for quality cutof
 hold on
 if isfield(exp, 'a_quality_cutoff') && isfield(exp, 'b_quality_cutoff')
@@ -147,12 +152,18 @@ ylabel('Sum Reporter ions')
 title('No mobile proton')
 
 
+%{
 if exp.calculate_cosine_distance
     %Calculate FDR
     exp.num_quantified=sum(exp.indeces);
     exp.Quant_false=sum(exp.indeces & exp.cosine_distance > 0.02);
     exp.Quant_FDR = exp.Quant_false/sum(exp.indeces);
 end
+%}
+
+exp.num_quantified=sum(exp.indeces);
+exp.Quant_false=sum(exp.indeces);
+exp.Quant_FDR = exp.Quant_false/sum(exp.indeces);
 
 if  any(strcmp('MS1_precursor_intensity',fieldnames(exp.data)))
     subplot(3,3,9)
