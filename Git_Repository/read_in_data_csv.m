@@ -5,7 +5,6 @@
 
 function data = read_in_data_csv(filename) 
 
-
 %read in excel file or csv file, xlsread is faster than reading in csv
 
 split_filename = regexp(filename,'\.','split');
@@ -20,6 +19,11 @@ else
 end
 
 save Imported_Data_Cell_Array
+
+% Strip out any " from cell array in header line to address some
+% compatibility issues with export from allosaurus
+
+imported_data_cell_array (1,:) = cellfun(@(x) erase(x,'"'),imported_data_cell_array (1,:),'UniformOutput',false);
  
 row_indeces= false(size(imported_data_cell_array,1),1);
 row_indeces(2:end)=true; % indeces of imported_data.data has to be adjusted for missing header
@@ -31,7 +35,6 @@ if col_indeces
 else
     sprintf('Warning ScanF could not be found \n')
 end
-
 
 col_indeces =0;
 [~,col_indeces]             = ismember('SrchID',imported_data_cell_array(1,:));
@@ -68,9 +71,6 @@ else
     sprintf('Warning Ion Injection Time could not be found \n')
 end
 
-%Calculate estimated ion numbers of precursors used for MS2 spectrum by
-%denormalizing ion flux with ion injection time.
-%data.denormalized_precursor_intensity = data.MS1_precursor_intensity.*data.ion_injection_time./1000;
 
 col_indeces =0;
 [~,col_indeces]             = ismember('Peptide',imported_data_cell_array(1,:));
@@ -90,8 +90,7 @@ else
 end
 col_indeces =0;
 
-
-[~,col_indeces]             = ismember({'126 Sn','127 Sn','128 Sn','129 Sn','130 Sn','131 Sn','x179Sn', 'x180Sn'},imported_data_cell_array(1,:));
+[~,col_indeces]             = ismember({'126 Sn','127n Sn','127c Sn','128n Sn','128c Sn','129n Sn','130n Sn', '130c Sn', '131n Sn','131c Sn','132n Sn','132c Sn','133n Sn','133c Sn',' 134n Sn'},imported_data_cell_array(1,:));
 if sum(col_indeces)
     col_indeces(col_indeces ==0)=[];
     data.reporter_ions          = cell2mat(imported_data_cell_array(row_indeces, col_indeces));          % Read in S/N of rerporter Ions from data_data => convert to number 
@@ -100,8 +99,9 @@ else
 end
 col_indeces =0;
     
-[~,col_indeces]             = ismember({'126 Mz Error','127 Mz Error','128 Mz Error','129 Mz Error','130 Mz Error','131 Mz Error'},imported_data_cell_array(1,:));
-if col_indeces
+[~,col_indeces]             = ismember({'126 Mz Error','127n Mz Error','127c Mz Error','128n Mz Error','128c Mz Error','129n Mz Error','130n Mz Error', '130c Mz Error', '131n Mz Error','131c Mz Error','132n Mz Error','132c Mz Error','133n Mz Error','133c Mz Error',' 134n Mz Error'},imported_data_cell_array(1,:));
+if sum(col_indeces)
+    col_indeces(col_indeces ==0)=[];
     data.mz_err_reporter_ions   = cell2mat(imported_data_cell_array(row_indeces, col_indeces));       % mz_error of reporter Ions 
 else
     sprintf('Warning m/z error for reporter ions could not be found \n')
@@ -193,19 +193,6 @@ else
 end
 col_indeces =0;
 
-% Convert m/z error for TMTc into approximate ppm error
-data.TMTc_mz_approx = (data.m_plus_H-158.125818)./(data.z-1);
-
-if exist('data.mz_err_Ynmin1_envelope','var')
-    data.ppm_err_TMTc = data.mz_err_Ynmin1_envelope./(repmat(data.TMTc_mz_approx,1,size(data.mz_err_Ynmin1_envelope,2)));
-end 
-% From Search ID and Peptide ID generate a unique identifier for each Scan
-% event
-data.Unique_identifier = cell(length(data.PepID),1);
-for index = 1: length(data.PepID)
-   data.Unique_identifier{index} = strcat(num2str(data.SrchID(index)),'_',num2str(data.PepID(index)));
-end
-
 [~,col_indeces]             = ismember({'LDA Probability'},imported_data_cell_array(1,:));  %LDA Probability
 if col_indeces
     data.LDA_probability        = cell2mat(imported_data_cell_array(row_indeces, col_indeces)); 
@@ -223,38 +210,18 @@ else
     sprintf('Warning: mz value for isolation window could not be found \n')
 end
 
-col_indeces =0;
+% Convert m/z error for TMTc into approximate ppm error
+data.TMTc_mz_approx = (data.m_plus_H-158.125818)./(data.z-1);
 
-[~,col_indeces]             = ismember({'fragment_sequence'},imported_data_cell_array(1,:));
-if sum(col_indeces)
-    col_indeces(col_indeces==0)=[];
-    data.fragment_sequence = imported_data_cell_array(row_indeces, col_indeces);  % mz value over which isolation window was centered
-else
-    sprintf('Warning: fragment sequence could not be found \n')
-end
+data.ppm_err_TMTc = 1E6*data.mz_err_Ynmin1_envelope./(repmat(data.TMTc_mz_approx,1,size(data.mz_err_Ynmin1_envelope,2)));
 
-[~,col_indeces]             = ismember({'missing_piece'},imported_data_cell_array(1,:));
-if sum(col_indeces)
-    col_indeces(col_indeces==0)=[];
-    data.missing_piece = imported_data_cell_array(row_indeces, col_indeces);  % mz value over which isolation window was centered
-else
-    sprintf('Warning: missing piece could not be found \n')
-end
 
-[~,col_indeces]             = ismember({'num_TMT_fragment'},imported_data_cell_array(1,:));
-if sum(col_indeces)
-    col_indeces(col_indeces==0)=[];
-    data.num_TMT_fragment = cell2mat(imported_data_cell_array(row_indeces, col_indeces));  % mz value over which isolation window was centered
-else
-    sprintf('Warning: num TMT fragment could not be found \n')
-end
 
-[~,col_indeces]             = ismember({'num_TMT_missing_piece'},imported_data_cell_array(1,:));
-if sum(col_indeces)
-    col_indeces(col_indeces==0)=[];
-    data.num_TMT_missing_piece = cell2mat(imported_data_cell_array(row_indeces, col_indeces));  % mz value over which isolation window was centered
-else
-    sprintf('Warning: num TMT missing piece could not be found \n')
+% From Search ID and Peptide ID generate a unique identifier for each Scan
+% event
+data.Unique_identifier = cell(length(data.PepID),1);
+for index = 1: length(data.PepID)
+   data.Unique_identifier{index} = strcat(num2str(data.SrchID(index)),'_',num2str(data.PepID(index)));
 end
 
 
