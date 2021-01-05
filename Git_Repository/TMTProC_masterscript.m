@@ -23,10 +23,11 @@ SN_cutoff = 0;
 Use_ppm_filter = 0;  %Use ppm filter as defined by Alex Johnson => throw out all spectra in which at least one compliment ion differs by more than 10ppm from expected values
 
 %Call the master program
-for filenames = {'mgupta_1602371268_clpp_mutant.xlsx'}
+for filenames = {'scan11131.xlsx'}
     results = demo_TMTProc_iso_Window(filenames{1},Noiseband,which_channels_to_use,SN_cutoff,Array_Iso_Window',Use_ppm_filter,TMT_Impurity_Matrix,Use_Precursor);
     saving_results_name = strsplit(filenames{1},'.')
     save(saving_results_name{1},'results')
     % plot summary of results
     plot_run_summaries(results);
 end
+
