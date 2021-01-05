@@ -12,7 +12,7 @@ ratios=zeros(max_for,10);
 goodnes_fit=zeros(max_for,1);
 calculated_TMTc_isotope_pattern = zeros(max_for,15);
 
-%initiate_Storage_for_binary_abundance
+%initiate Storage_for_binary_abundance
 binary_abundand_Ynmin1_positions_saved = zeros(max_for,15);
 
 %initiate What percentage of each position permeates the isolation window
