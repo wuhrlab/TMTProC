@@ -31,7 +31,7 @@ title(title_)
 
 %Plot Histogram scatter plot of precursor intensity versus sum TMTc ions
 subplot(3,3,3)
-% Precursor intensity is dividec by 11.3 as Thermo seems to overestimat the
+% Precursor intensity is dividec by 11.3 as Thermo seems to overestimate the
 % number of ions (See Labnotebook entry from 2015-August-07)
 loglog(exp.data.MS1_precursor_intensity(exp.data.mobile_protons<1).*exp.data.ion_injection_time(exp.data.mobile_protons<1)./1000./11.3,exp.data.sum_ions_Ynmin1(exp.data.mobile_protons<1),'.')
 hold on
