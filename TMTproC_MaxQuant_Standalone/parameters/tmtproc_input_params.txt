@@ -1,0 +1,5 @@
+which_channels_to_use=[0,1,1,1,1,1,1,1,1,0]
+noiseband=1
+sn_cutoff=100
+use_ppm_filter=0
+use_precursor=0
