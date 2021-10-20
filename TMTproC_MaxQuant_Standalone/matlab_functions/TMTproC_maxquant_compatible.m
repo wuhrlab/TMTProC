@@ -9,7 +9,7 @@ params = read_parameters('parameters/tmtproc_input_params.txt');
 load('Saved_Iso_Window_0p4')
 
 %load TMT isotopic Impurity Matrix
-load('TMTPro_Impurity_Matrix_2019')
+load('TMTpro_Impurity_Matrix_2021')
 
 %Use_Precursor = 0;
 %which_channels_to_use = [0,1,1,1,1,1,1,1,1,0]; % binary which channels to use, first position is TMTPro0, second position is TMTPro126, 9th position is TMTPro134N, 10th position is currently not usable.
